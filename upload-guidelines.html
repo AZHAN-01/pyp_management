@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Guidelines - KU PYP Management</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./styles.css?v=3">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Background elements -->
+    <div class="gradient-bg"></div>
+    <div class="gradient-blob blob-1"></div>
+    <div class="gradient-blob blob-2"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">
+        <i data-feather="book-open"></i>
+        KU PYP Management
+      </div>
+      <div class="nav-links">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Theme" style="background: transparent; box-shadow: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; width: auto; height: auto;">
+          <i data-feather="moon" id="themeIcon"></i>
+        </button>
+        <a href="index.html" class="nav-link" style="display: flex; align-items: center; gap: 0.5rem;">
+          <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i> Back to Home
+        </a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="padding-top: 4rem;">
+      <header class="hero" style="margin-top: 0; margin-bottom: 3rem;">
+        <h1>Upload <span>Guidelines</span></h1>
+        <p>Please read these guidelines carefully before contributing a previous year paper.</p>
+      </header>
+      
+      <section class="guidelines-wrapper fade-in-element">
+        <div class="guidelines-grid">
+          
+          <!-- Card 1 -->
+          <div class="guideline-card">
+            <div class="guideline-icon success">
+              <i data-feather="check-circle"></i>
+            </div>
+            <h3>Clear & Readable</h3>
+            <p>Upload clear and readable images only. Avoid shaky or dimly lit photos that are hard to read.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="guideline-card">
+            <div class="guideline-icon info">
+              <i data-feather="image"></i>
+            </div>
+            <h3>Supported Formats</h3>
+            <p>We support standard image formats: JPG, JPEG, PNG, and WEBP. No PDFs are allowed.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="guideline-card">
+            <div class="guideline-icon warning">
+              <i data-feather="file-minus"></i>
+            </div>
+            <h3>One Paper at a Time</h3>
+            <p>Upload one question paper per submission. Do not mix multiple different exam papers.</p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="guideline-card">
+            <div class="guideline-icon info">
+              <i data-feather="list"></i>
+            </div>
+            <h3>Accurate Details</h3>
+            <p>Select the correct Course, Semester, Subject, and Examination Year when filling out the form.</p>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="guideline-card">
+            <div class="guideline-icon success">
+              <i data-feather="layers"></i>
+            </div>
+            <h3>Complete Papers</h3>
+            <p>Upload complete papers whenever possible. Ensure all pages of the question paper are included.</p>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="guideline-card">
+            <div class="guideline-icon danger">
+              <i data-feather="x-octagon"></i>
+            </div>
+            <h3>What NOT to Upload</h3>
+            <p>Do not upload personal documents, notes, assignments, duplicate papers, or blurred images.</p>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="guideline-card">
+            <div class="guideline-icon warning">
+              <i data-feather="eye"></i>
+            </div>
+            <h3>Quality Review</h3>
+            <p>All uploads may be reviewed by moderators before being published to ensure community quality.</p>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="guideline-card">
+            <div class="guideline-icon danger">
+              <i data-feather="shield"></i>
+            </div>
+            <h3>No Sensitive Info</h3>
+            <p>Do not upload content containing personal or sensitive information. Protect your privacy.</p>
+          </div>
+
+          <!-- Card 9 -->
+          <div class="guideline-card">
+            <div class="guideline-icon info">
+              <i data-feather="minimize"></i>
+            </div>
+            <h3>File Size</h3>
+            <p>Keep file sizes reasonable for faster uploads and better performance for everyone downloading.</p>
+          </div>
+          
+        </div>
+
+        <div class="guidelines-footer">
+          <div class="guidelines-footer-icon">
+            <i data-feather="heart"></i>
+          </div>
+          <h3>Help the Community</h3>
+          <p>By contributing high-quality previous year papers, you are directly helping fellow students prepare better for their examinations. Thank you for your support!</p>
+          <a href="index.html" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+            <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+            Return to Homepage
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="modern-footer">
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <p>&copy; <span id="currentYear"></span> KU Previous Year Papers. All rights reserved.</p>
+          <p>Made with ❤️ for Students.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/feather-icons" defer></script>
+  <script src="./script.js?v=2" defer></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Logs
+logs
+*.log
+
+# Editor and OS files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?
+
+# Database Configuration
+backend/db.php
+
+# User Uploads
+backend/uploads/

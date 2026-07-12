@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KU PYP Management</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cropper.js CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./styles.css?v=2">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Background elements -->
+    <div class="gradient-bg"></div>
+    <div class="gradient-blob blob-1"></div>
+    <div class="gradient-blob blob-2"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">
+        <i data-feather="book-open"></i>
+        KU PYP Management
+      </div>
+      <div class="nav-links">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Theme" style="background: transparent; box-shadow: none; border: none; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; width: auto; height: auto;">
+          <i data-feather="moon" id="themeIcon"></i>
+        </button>
+        <a href="#about" class="nav-link" style="display: flex; align-items: center;">About</a>
+        <a href="#contact" class="nav-link" style="display: flex; align-items: center;">Contact</a>
+        <a href="faq.html" class="nav-link" style="display: flex; align-items: center;">FAQ</a>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="hero">
+        <h1>Your Hub for <span>Previous Year Papers</span></h1>
+        <p>Easily upload and download past question papers for kashmir University. Simplify your exam preparation with a community-driven repository.</p>
+      </header>
+      
+      <section class="features-container">
+        <!-- Upload Card -->
+        <div class="feature-card" id="openUploadModal">
+          <div class="icon-wrapper">
+            <i data-feather="upload-cloud"></i>
+          </div>
+          <h3>Upload Papers</h3>
+          <p>Contribute to the community by uploading images of previous year question papers.</p>
+          <span class="badge">Images Only</span>
+        </div>
+
+        <!-- Download Card -->
+        <div class="feature-card" id="openDownloadModal">
+          <div class="icon-wrapper">
+            <i data-feather="download"></i>
+          </div>
+          <h3>Download Papers</h3>
+          <p>Access and download high-quality images of past papers for your exam prep.</p>
+          <span class="badge warning">No PDFs</span>
+        </div>
+      </section>
+
+      <!-- Live Dashboard -->
+      <section class="dashboard-stats" id="dashboardStats" style="margin-top: 2rem;">
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #dbeafe; color: #2563eb;">
+            <i data-feather="file-text"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Total Papers Uploaded</h3>
+            <p class="stat-number" id="statUploads">0</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: #dcfce7; color: #16a34a;">
+            <i data-feather="download-cloud"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Total Downloads</h3>
+            <p class="stat-number" id="statDownloads">0</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+      <div class="about-container">
+        <h2>#About </h2>
+        <p class="about-intro">KU Previous Year Papers is a student-driven platform designed to help students prepare for examinations by providing easy access to previous years' question papers from Kashmir University.</p>
+        <p>The platform allows students to search papers by semester, subject, and subject code, making it quick and convenient to find relevant exam material.</p>
+
+        <div class="about-grid">
+          <div class="about-card">
+            <h3>Our Mission</h3>
+            <p>Our mission is to make previous year papers accessible to every student while encouraging the academic community to contribute and support one another. By creating a centralized repository, we aim to reduce the time students spend searching for papers and help them focus on their preparation.</p>
+          </div>
+
+          <div class="about-card">
+            <h3>Key Features</h3>
+            <ul>
+              <li>Organized papers by Semester, and Subject.</li>
+              <li>Fast search and filtering.</li>
+              <li>Student-contributed paper uploads.</li>
+              <li>Secure upload moderation to maintain quality.</li>
+              <li>Mobile-friendly and responsive interface.</li>
+              <li>Clean, modern, and easy-to-use design.</li>
+            </ul>
+          </div>
+
+          <div class="about-card">
+            <h3>Community Driven</h3>
+            <p>This platform grows through student contributions. Every uploaded paper helps future students prepare better for their examinations. Together, we can build a comprehensive collection of previous year papers for everyone.</p>
+          </div>
+        </div>
+
+        <div class="disclaimer-box">
+          <h3>Disclaimer</h3>
+          <p>This website is an independent student initiative and is not officially affiliated with Kashmir University or any other educational institution. All uploaded papers remain the responsibility of the contributors and are intended solely for educational and exam preparation purposes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="contact-container">
+        <div class="contact-grid">
+          <!-- Left Side -->
+          <div class="contact-left fade-in-element">
+            <h2>Contact Us</h2>
+            <p class="contact-intro">Have a question, suggestion, or found an issue? We'd love to hear from you. Reach out and we'll get back to you as soon as possible.</p>
+            
+            <div class="contact-info-list">
+              <a href="mailto:mohdazhannajar@gmail.com" class="info-item" style="text-decoration: none; cursor: pointer;">
+                <div class="info-icon">
+                  <i data-feather="mail"></i>
+                </div>
+                <div class="info-text">
+                  <span>Email</span>
+                  <p>mohdazhannajar@gmail.com</p>
+                </div>
+              </a>
+            </div>
+
+            <div class="social-links-modern">
+              <a href="https://github.com/AZHAN-01" target="_blank" rel="noopener noreferrer" class="social-btn-icon github" aria-label="GitHub"><i data-feather="github"></i></a>
+              <a href="https://www.linkedin.com/in/mohd-azhan-7500a225a" target="_blank" rel="noopener noreferrer" class="social-btn-icon linkedin" aria-label="LinkedIn"><i data-feather="linkedin"></i></a>
+              <a href="https://www.instagram.com/azhanmuzaffar56/" target="_blank" rel="noopener noreferrer" class="social-btn-icon instagram" aria-label="Instagram"><i data-feather="instagram"></i></a>
+              <a href="https://x.com/MohdAzhan_56" target="_blank" rel="noopener noreferrer" class="social-btn-icon twitter" aria-label="X (Twitter)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Side: Contact Form -->
+          <div class="contact-right fade-in-element delay-1">
+            <div class="contact-form-wrapper modern-form-wrapper">
+              <form class="contact-form modern-form" id="contactForm" action="https://formspree.io/f/mzzknjya" method="POST">
+                <div class="form-row">
+                  <div class="form-group modern-group">
+                    <input required type="text" name="name" id="contactName" class="modern-input" placeholder=" " />
+                    <label for="contactName" class="modern-label">Full Name</label>
+                  </div>
+                  <div class="form-group modern-group">
+                    <input required type="email" name="email" id="contactEmail" class="modern-input" placeholder=" " />
+                    <label for="contactEmail" class="modern-label">Email Address</label>
+                  </div>
+                </div>
+                
+                <div class="form-group modern-group">
+                  <input required type="text" name="subject" id="contactSubject" class="modern-input" placeholder=" " />
+                  <label for="contactSubject" class="modern-label">Subject</label>
+                </div>
+                
+                <div class="form-group modern-group">
+                  <textarea required name="message" id="contactMessage" class="modern-input" rows="4" placeholder=" "></textarea>
+                  <label for="contactMessage" class="modern-label">Message</label>
+                </div>
+                
+                <div id="contactStatus" class="contact-status hidden"></div>
+                
+                <button type="submit" class="btn-primary btn-large btn-animate" id="contactSubmitBtn">
+                  <span class="btn-text" id="contactBtnText">Send Message</span>
+                  <i data-feather="arrow-right" class="btn-icon"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="modern-footer">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <a href="index.html">Home</a>
+          <a href="#" class="open-download-modal">Browse Papers</a>
+          <a href="#" class="open-upload-modal">Upload Paper</a>
+          <a href="index.html#about">About</a>
+          <a href="index.html#contact">Contact</a>
+          <a href="faq.html">FAQ</a>
+          <a href="privacy-policy.html">Privacy Policy</a>
+          <a href="terms-of-service.html">Terms of Service</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#" class="open-download-modal">Search Papers</a>
+          <a href="upload-guidelines.html">Upload Guidelines</a>
+          <a href="index.html#contact">Report Incorrect Paper</a>
+          <a href="index.html#contact">Request a Paper</a>
+          <a href="index.html#contact">Support</a>
+        </div>
+        <div class="footer-col brand-col">
+          <div class="footer-logo">
+            <i data-feather="book-open"></i>
+            <span>KU Previous Year Papers</span>
+          </div>
+          <p class="footer-desc">Helping students access previous year question papers for better exam preparation.</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <p>&copy; <span id="currentYear"></span> KU Previous Year Papers. All rights reserved.</p>
+          <p>Made with ❤️ for Students.</p>
+          <p>Designed and Developed by <a href="https://github.com/AZHAN-01" target="_blank" rel="noopener noreferrer" class="dev-link">Mohammad Azhan Najar</a></p>
+        </div>
+      </div>
+    </footer>
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+      <i data-feather="arrow-up"></i>
+    </button>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-content">
+      <button class="close-btn" id="closeUploadModal" aria-label="Close modal">
+        <i data-feather="x"></i>
+      </button>
+
+      <h2 class="modal-title" id="uploadModalTitle">Upload Paper</h2>
+
+      <!-- Step 1: Selection -->
+      <div id="step1-selection" class="step-container active">
+        <div class="upload-options">
+          <button class="option-card camera-option-card" id="btnCamera">
+            <i data-feather="camera" style="width: 48px; height: 48px; margin-bottom: 10px;"></i>
+            <span>Click Picture</span>
+          </button>
+          <button class="option-card" id="btnGallery">
+            <i data-feather="folder" style="width: 48px; height: 48px; margin-bottom: 10px;"></i>
+            <span>Select from Gallery</span>
+          </button>
+
+          <!-- Hidden inputs -->
+          <input type="file" accept="image/*" capture="environment" id="cameraInput" style="display: none;" />
+          <input type="file" accept="image/*" id="galleryInput" style="display: none;" />
+        </div>
+      </div>
+
+      <!-- Step 2: Cropper -->
+      <div id="step2-cropper" class="step-container hidden">
+        <div class="cropper-section">
+          <div class="crop-container" style="display: flex; justify-content: center; background-color: #e2e8f0;">
+            <img id="imageToCrop" src="" alt="Crop me" style="max-height: 400px; max-width: 100%; display: block;">
+          </div>
+          
+          <div class="controls">
+            <div class="control-group">
+              <label>Rotation</label>
+              <div class="rotate-controls">
+                <input type="range" id="rotationSlider" value="0" min="0" max="360" step="1" class="slider" />
+                <button class="icon-btn" id="btnRotate90" title="Rotate 90 degrees">
+                  <i data-feather="rotate-cw"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="action-buttons">
+              <button class="btn-secondary" id="btnCancelCrop">Cancel</button>
+              <button class="btn-primary" id="btnConfirmCrop">Confirm Crop</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Metadata Form -->
+      <div id="step3-metadata" class="step-container hidden">
+        <form class="metadata-form-container" id="metadataForm">
+          <div class="metadata-preview">
+            <img id="finalPreviewImg" src="" alt="Cropped preview" class="preview-img" />
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name of Student</label>
+              <input required type="text" name="studentName" class="form-input" placeholder="John Doe" />
+            </div>
+            <div class="form-group">
+              <label>Department Name</label>
+              <input required type="text" name="department" class="form-input" placeholder="Computer Science" />
+            </div>
+            <div class="form-group">
+              <label>Batch</label>
+              <input required type="text" name="batch" class="form-input" placeholder="2022-2026" />
+            </div>
+            <div class="form-group">
+              <label>Paper Name</label>
+              <input required type="text" name="paperName" class="form-input" placeholder="Data Structures" />
+            </div>
+            <div class="form-group">
+              <label>Paper Code</label>
+              <input required type="text" name="paperCode" class="form-input" placeholder="CS-201" />
+            </div>
+            <div class="form-group">
+              <label>Semester</label>
+              <select name="semester" class="form-select">
+                <option value="1st">1st Semester</option>
+                <option value="2nd">2nd Semester</option>
+                <option value="3rd">3rd Semester</option>
+                <option value="4th">4th Semester</option>
+                <option value="5th">5th Semester</option>
+                <option value="6th">6th Semester</option>
+                <option value="7th">7th Semester</option>
+                <option value="8th">8th Semester</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Year of Paper</label>
+              <input required type="number" name="year" id="yearInput" class="form-input" placeholder="2023" />
+            </div>
+            <div class="form-group">
+              <label>Month of Paper</label>
+              <select name="month" class="form-select">
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="btnEditImage">Edit Image</button>
+            <button type="submit" class="btn-primary">Finalize Upload</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Modal -->
+  <div class="modal-overlay" id="downloadModal">
+    <div class="modal-content download-modal-content">
+      <button class="close-btn" id="closeDownloadModal" aria-label="Close modal">
+        <i data-feather="x"></i>
+      </button>
+
+      <h2 class="modal-title">Download Papers</h2>
+      <p class="modal-subtitle">Enter the subject name or the specific course code to find previous year papers.</p>
+
+      <form class="search-form" id="searchForm">
+        <div class="form-group">
+          <label>Paper Name (Subject)</label>
+          <input type="text" id="searchPaperName" class="form-input" placeholder="e.g., Data Structures" />
+        </div>
+        
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div class="form-group">
+          <label>Paper Code</label>
+          <input type="text" id="searchPaperCode" class="form-input" placeholder="e.g., CS-201" />
+        </div>
+
+        <div class="form-group">
+          <label>Semester (Optional Filter)</label>
+          <select id="searchSemester" class="form-select">
+            <option value="">Any Semester</option>
+            <option value="1st">1st Semester</option>
+            <option value="2nd">2nd Semester</option>
+            <option value="3rd">3rd Semester</option>
+            <option value="4th">4th Semester</option>
+            <option value="5th">5th Semester</option>
+            <option value="6th">6th Semester</option>
+            <option value="7th">7th Semester</option>
+            <option value="8th">8th Semester</option>
+          </select>
+        </div>
+
+        <button type="submit" id="btnSearch" class="btn-primary search-btn" disabled>
+          <i data-feather="search" style="width: 18px; height: 18px;"></i>
+          <span id="searchBtnText">Search Papers</span>
+        </button>
+      </form>
+
+      <!-- Search Results Area -->
+      <div id="searchResultsArea" class="search-results hidden">
+        <h3>Search Results</h3>
+        <div class="results-grid" id="resultsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/feather-icons" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" defer></script>
+  <script src="./script.js?v=3" defer></script>
+</body>
+</html>
