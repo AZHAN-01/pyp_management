@@ -120,6 +120,7 @@ const finalPreviewImg = document.getElementById('finalPreviewImg');
 
 let cropper = null;
 let currentRotation = 0;
+let turnstileWidgetId = null;
 
 document.getElementById('btnCamera').addEventListener('click', () => cameraInput.click());
 document.getElementById('btnGallery').addEventListener('click', () => galleryInput.click());
@@ -186,12 +187,23 @@ document.getElementById('btnConfirmCrop').addEventListener('click', () => {
   
   finalPreviewImg.src = canvas.toDataURL('image/jpeg');
 
-  // Switch to step 3
   step2.classList.remove('active');
   step2.classList.add('hidden');
   step3.classList.remove('hidden');
   step3.classList.add('active');
   modalTitle.textContent = "Paper Details";
+
+  // Render or reset CAPTCHA explicitly
+  if (typeof turnstile !== 'undefined') {
+    if (turnstileWidgetId === null) {
+      turnstileWidgetId = turnstile.render('#turnstile-widget', {
+        sitekey: '0x4AAAAAAD0ecYMaSbzQmT-a',
+        theme: 'auto'
+      });
+    } else {
+      turnstile.reset(turnstileWidgetId);
+    }
+  }
 });
 
 // Edit Image (Go back from Step 3 to Step 2)
@@ -213,6 +225,17 @@ document.getElementById('metadataForm').addEventListener('submit', async (e) => 
 
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData.entries());
+  
+  // CAPTCHA Validation
+  const captchaToken = data['cf-turnstile-response'];
+  if (!captchaToken) {
+    alert("Please complete the CAPTCHA verification.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Finalize Upload";
+    return;
+  }
+  
+  data.captcha_token = captchaToken;
   data.image = finalPreviewImg.src;
   
   try {
@@ -230,10 +253,17 @@ document.getElementById('metadataForm').addEventListener('submit', async (e) => 
       fetchStats(); // Update dashboard instantly
     } else {
       alert("Error: " + result.message);
+      // Reset CAPTCHA so user can try again
+      if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
     }
   } catch(error) {
     console.error(error);
     alert("Failed to connect to the server.");
+    if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+      turnstile.reset(turnstileWidgetId);
+    }
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = "Finalize Upload";
@@ -260,6 +290,10 @@ function resetUploadModal() {
   document.getElementById('yearInput').value = new Date().getFullYear();
   document.getElementById('rotationSlider').value = 0;
   currentRotation = 0;
+  
+  if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+    turnstile.reset(turnstileWidgetId);
+  }
 }
 
 

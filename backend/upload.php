@@ -17,11 +17,50 @@ if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// Get the raw POST data
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data) {
     echo json_encode(["status" => "error", "message" => "No data received"]);
+    exit;
+}
+
+// CAPTCHA Verification
+$config = require __DIR__ . '/config.php';
+$captchaToken = isset($data['captcha_token']) ? $data['captcha_token'] : '';
+
+if (empty($captchaToken)) {
+    echo json_encode(["status" => "error", "message" => "CAPTCHA token is missing."]);
+    exit;
+}
+
+$verifyData = [
+    'secret' => $config['captcha']['secret_key'],
+    'response' => $captchaToken,
+    'remoteip' => $_SERVER['REMOTE_ADDR']
+];
+
+$options = [
+    'http' => [
+        'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+        'method'  => 'POST',
+        'content' => http_build_query($verifyData)
+    ]
+];
+$context  = stream_context_create($options);
+$verifyResult = file_get_contents($config['captcha']['verify_url'], false, $context);
+$captchaResponse = json_decode($verifyResult);
+
+if (!$captchaResponse || !$captchaResponse->success) {
+    // Log failed attempt
+    $logDir = __DIR__ . '/logs';
+    if (!file_exists($logDir)) {
+        mkdir($logDir, 0777, true);
+    }
+    $logFile = $logDir . '/captcha.log';
+    $logMsg = date('Y-m-d H:i:s') . " - CAPTCHA Failed - IP: " . $_SERVER['REMOTE_ADDR'] . "\n";
+    file_put_contents($logFile, $logMsg, FILE_APPEND);
+
+    echo json_encode(["status" => "error", "message" => "CAPTCHA verification failed. Please try again."]);
     exit;
 }
 
