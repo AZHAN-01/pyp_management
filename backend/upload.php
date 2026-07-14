@@ -116,7 +116,7 @@ if (file_put_contents($filePath, $fileData)) {
             $fileName
         ]);
         
-        echo json_encode(["status" => "success", "message" => "Paper uploaded successfully!"]);
+        echo json_encode(["status" => "success", "message" => "Upload Successful! Your paper is under review by an admin."]);
     } catch (\PDOException $e) {
         echo json_encode(["status" => "error", "message" => "Database insert failed: " . $e->getMessage()]);
     }

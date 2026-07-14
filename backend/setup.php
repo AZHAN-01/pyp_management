@@ -1,9 +1,11 @@
 <?php
 // setup.php - Run this once in the browser to initialize the database and table
 
-$host = '127.0.0.1';
-$user = 'root';
-$pass = ''; // Default XAMPP password is empty
+require_once __DIR__ . '/env.php';
+
+$host = $_ENV['DB_HOST'] ?? '127.0.0.1';
+$user = $_ENV['DB_USER'] ?? 'root';
+$pass = $_ENV['DB_PASS'] ?? '';
 
 try {
     // 1. Connect without database to create it

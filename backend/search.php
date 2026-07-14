@@ -10,7 +10,7 @@ $searchPaperCode = isset($_GET['paperCode']) ? trim($_GET['paperCode']) : '';
 $searchSemester = isset($_GET['semester']) ? $_GET['semester'] : '';
 
 // Build dynamic SQL query
-$query = "SELECT * FROM papers WHERE 1=1";
+$query = "SELECT * FROM papers WHERE status = 'approved'";
 $params = [];
 
 // Handle Name OR Code

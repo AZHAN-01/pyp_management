@@ -44,7 +44,7 @@
         </button>
         <a href="#about" class="nav-link" style="display: flex; align-items: center;">About</a>
         <a href="#contact" class="nav-link" style="display: flex; align-items: center;">Contact</a>
-        <a href="faq.html" class="nav-link" style="display: flex; align-items: center;">FAQ</a>
+        <a href="#" id="openAdminLoginModal" class="nav-link" style="display: flex; align-items: center;">Admin</a>
       </div>
     </nav>
 
@@ -272,6 +272,47 @@
     <button id="backToTop" class="back-to-top" aria-label="Back to top">
       <i data-feather="arrow-up"></i>
     </button>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminLoginModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <button class="close-btn" id="closeAdminLoginModal" aria-label="Close modal">
+        <i data-feather="x"></i>
+      </button>
+      <div style="margin-bottom: 1.5rem; color: var(--primary-color);">
+        <i data-feather="shield" style="width: 48px; height: 48px;"></i>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 1rem; font-size: 1.5rem;">Secure Access</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Enter the admin password to continue.</p>
+      
+      <div class="form-group modern-group" style="text-align: left; margin-bottom: 1.5rem;">
+        <input type="password" id="adminPassword" class="modern-input" placeholder=" " />
+        <label for="adminPassword" class="modern-label">Admin Password</label>
+      </div>
+      
+      <button class="btn-primary" id="btnAdminLogin" style="width: 100%;">Authenticate</button>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Modal -->
+  <div class="modal-overlay" id="adminDashboardModal">
+    <div class="modal-content" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;"><i data-feather="layout"></i> Moderation Dashboard</h2>
+        <div style="display: flex; gap: 1rem;">
+          <button class="icon-btn" id="btnAdminRefresh" aria-label="Refresh" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer;"><i data-feather="refresh-cw"></i></button>
+          <button class="icon-btn" id="btnAdminLogout" aria-label="Logout" style="background: transparent; border: none; color: #ef4444; cursor: pointer;"><i data-feather="log-out"></i></button>
+          <button class="close-btn" id="closeAdminDashboardModal" aria-label="Close modal" style="position: static; margin-left: 1rem;">
+            <i data-feather="x"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div id="adminPendingList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem;">
+        <!-- Pending papers will be injected here via JS -->
+      </div>
+    </div>
   </div>
 
   <!-- Desktop Mode Warning Modal -->

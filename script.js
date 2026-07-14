@@ -727,9 +727,21 @@ window.addEventListener('scroll', () => {
 });
 
 if (backToTopBtn) {
-  backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+  imageToCrop.src = "";
+  cameraInput.value = "";
+  galleryInput.value = "";
+  document.getElementById('metadataForm').reset();
+  document.getElementById('yearInput').value = new Date().getFullYear();
+  document.getElementById('rotationSlider').value = 0;
+  currentRotation = 0;
+  
+  if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+    turnstile.reset(turnstileWidgetId);
+  }
 }
 
 // --- FAQ Accordion Logic ---
@@ -737,26 +749,181 @@ const faqItems = document.querySelectorAll('.faq-item');
 
 faqItems.forEach(item => {
   const question = item.querySelector('.faq-question');
-  
-  question.addEventListener('click', () => {
-    const isActive = item.classList.contains('active');
-    
-    // Close all items
-    faqItems.forEach(otherItem => {
-      otherItem.classList.remove('active');
-      const otherAnswer = otherItem.querySelector('.faq-answer');
-      if (otherAnswer) {
-        otherAnswer.style.maxHeight = null;
+  if(question) {
+    question.addEventListener('click', () => {
+      const isActive = item.classList.contains('active');
+      
+      // Close all items
+      faqItems.forEach(otherItem => {
+        otherItem.classList.remove('active');
+        const otherAnswer = otherItem.querySelector('.faq-answer');
+        if (otherAnswer) {
+          otherAnswer.style.maxHeight = null;
+        }
+      });
+      
+      // If it wasn't active, open it
+      if (!isActive) {
+        item.classList.add('active');
+        const answer = item.querySelector('.faq-answer');
+        if (answer) {
+          answer.style.maxHeight = answer.scrollHeight + "px";
+        }
       }
     });
-    
-    // If it wasn't active, open it
-    if (!isActive) {
-      item.classList.add('active');
-      const answer = item.querySelector('.faq-answer');
-      if (answer) {
-        answer.style.maxHeight = answer.scrollHeight + "px";
-      }
-    }
-  });
+  }
 });
+
+// --- Admin Panel Logic ---
+const openAdminLoginModal = document.getElementById('openAdminLoginModal');
+const adminLoginModal = document.getElementById('adminLoginModal');
+const closeAdminLoginModal = document.getElementById('closeAdminLoginModal');
+const btnAdminLogin = document.getElementById('btnAdminLogin');
+const adminPassword = document.getElementById('adminPassword');
+
+const adminDashboardModal = document.getElementById('adminDashboardModal');
+const closeAdminDashboardModal = document.getElementById('closeAdminDashboardModal');
+const btnAdminLogout = document.getElementById('btnAdminLogout');
+const btnAdminRefresh = document.getElementById('btnAdminRefresh');
+const adminPendingList = document.getElementById('adminPendingList');
+
+// Open Login Modal
+if(openAdminLoginModal) {
+  openAdminLoginModal.addEventListener('click', (e) => {
+    e.preventDefault();
+    adminLoginModal.classList.add('show');
+  });
+}
+
+// Close Login Modal
+if(closeAdminLoginModal) {
+  closeAdminLoginModal.addEventListener('click', () => {
+    adminLoginModal.classList.remove('show');
+  });
+}
+
+// Close Dashboard Modal
+if(closeAdminDashboardModal) {
+  closeAdminDashboardModal.addEventListener('click', () => {
+    adminDashboardModal.classList.remove('show');
+  });
+}
+
+// Handle Login
+if(btnAdminLogin) {
+  btnAdminLogin.addEventListener('click', async () => {
+    const pwd = adminPassword.value;
+    if(!pwd) return alert('Enter password');
+    
+    btnAdminLogin.textContent = 'Authenticating...';
+    try {
+      const res = await fetch('backend/admin_login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pwd })
+      });
+      const data = await res.json();
+      
+      if(data.status === 'success') {
+        adminPassword.value = '';
+        adminLoginModal.classList.remove('show');
+        loadPendingPapers();
+        adminDashboardModal.classList.add('show');
+      } else {
+        alert(data.message);
+      }
+    } catch(err) {
+      alert('Network error');
+    }
+    btnAdminLogin.textContent = 'Authenticate';
+  });
+}
+
+// Handle Logout
+if(btnAdminLogout) {
+  btnAdminLogout.addEventListener('click', async () => {
+    await fetch('backend/admin_logout.php');
+    adminDashboardModal.classList.remove('show');
+    alert('Logged out successfully.');
+  });
+}
+
+// Handle Refresh
+if(btnAdminRefresh) {
+  btnAdminRefresh.addEventListener('click', loadPendingPapers);
+}
+
+// Fetch and render pending papers
+async function loadPendingPapers() {
+  adminPendingList.innerHTML = '<div style="text-align:center; padding: 2rem;">Loading...</div>';
+  try {
+    const res = await fetch('backend/get_pending.php');
+    const data = await res.json();
+    
+    if(data.status !== 'success') {
+      adminPendingList.innerHTML = `<div style="text-align:center; color:red; padding:2rem;">${data.message}</div>`;
+      return;
+    }
+    
+    const papers = data.data;
+    if(papers.length === 0) {
+      adminPendingList.innerHTML = `
+        <div style="text-align:center; padding: 4rem; color: var(--text-secondary);">
+          <i data-feather="check-circle" style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--success);"></i>
+          <h3>All caught up!</h3>
+          <p>There are no pending papers to moderate.</p>
+        </div>
+      `;
+      feather.replace();
+      return;
+    }
+    
+    adminPendingList.innerHTML = '';
+    papers.forEach(p => {
+      const div = document.createElement('div');
+      div.style.cssText = 'background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass-border); flex-wrap: wrap; gap: 1rem;';
+      
+      div.innerHTML = `
+        <div>
+          <h3 style="margin-bottom: 0.25rem; font-size: 1.1rem; color: var(--text-primary);">${p.paperName} (${p.year})</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">${p.department} | Sem: ${p.semester} | By: ${p.studentName}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <a href="backend/uploads/${p.fileName}" target="_blank" class="btn-primary" style="padding: 0.5rem 1rem; text-decoration:none; display:flex; align-items:center; gap:0.25rem;"><i data-feather="eye"></i> View</a>
+          <button onclick="handleAdminAction(${p.id}, 'approve')" style="background: var(--success); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; display:flex; align-items:center; gap:0.25rem; font-weight: 500;"><i data-feather="check"></i> Approve</button>
+          <button onclick="handleAdminAction(${p.id}, 'reject')" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; display:flex; align-items:center; gap:0.25rem; font-weight: 500;"><i data-feather="x"></i> Reject</button>
+        </div>
+      `;
+      adminPendingList.appendChild(div);
+    });
+    feather.replace();
+    
+  } catch(err) {
+    adminPendingList.innerHTML = '<div style="text-align:center; color:red; padding:2rem;">Failed to load papers.</div>';
+  }
+}
+
+// Handle Approve/Reject Action
+window.handleAdminAction = async function(id, action) {
+  if(action === 'reject' && !confirm('Permanently delete this paper?')) return;
+  
+  try {
+    const res = await fetch('backend/admin_actions.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `id=${id}&action=${action}`
+    });
+    const data = await res.json();
+    
+    if(data.status === 'success') {
+      loadPendingPapers(); // Reload list
+      fetchStats(); // Update dashboard counts
+    } else {
+      alert(data.message);
+    }
+  } catch(err) {
+    alert('Network Error');
+  }
+};
+
+
