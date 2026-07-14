@@ -32,7 +32,9 @@ try {
     $updateStmt->execute([$id]);
     
     // 3. Serve the file
-    $downloadName = $paper['paperCode'] . "_" . $paper['year'] . ".jpg";
+    $extension = pathinfo($paper['fileName'], PATHINFO_EXTENSION);
+    if (!$extension) $extension = 'pdf';
+    $downloadName = $paper['paperCode'] . "_" . $paper['year'] . "." . $extension;
     
     header('Content-Description: File Transfer');
     header('Content-Type: application/octet-stream');

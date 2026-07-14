@@ -40,12 +40,40 @@ themeToggleBtn.addEventListener('click', () => {
     console.error("Failed to save theme:", e);
   }
   updateThemeIcon(newTheme);
+  
+  // Re-render chart to match theme colors
+  if (typeof semesterChartInstance !== 'undefined' && semesterChartInstance !== null) {
+      fetchStats(); 
+  }
 });
 document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// --- Desktop Mode Warning ---
+document.addEventListener('DOMContentLoaded', () => {
+  const desktopModeModal = document.getElementById('desktopModeModal');
+  const closeDesktopModeModal = document.getElementById('closeDesktopModeModal');
+  const btnAcknowledgeDesktopMode = document.getElementById('btnAcknowledgeDesktopMode');
+
+  // Check if screen is mobile-sized (<= 768px)
+  if (window.innerWidth <= 768) {
+    // Show every time on load as requested
+    setTimeout(() => {
+      desktopModeModal.classList.add('show');
+    }, 500);
+  }
+
+  const hideDesktopWarning = () => {
+    desktopModeModal.classList.remove('show');
+  };
+
+  if (closeDesktopModeModal) closeDesktopModeModal.addEventListener('click', hideDesktopWarning);
+  if (btnAcknowledgeDesktopMode) btnAcknowledgeDesktopMode.addEventListener('click', hideDesktopWarning);
+});
 
 // --- Dashboard Logic ---
 const statUploads = document.getElementById('statUploads');
 const statDownloads = document.getElementById('statDownloads');
+let semesterChartInstance = null;
 
 async function fetchStats() {
   try {
@@ -54,9 +82,119 @@ async function fetchStats() {
     if (result.status === 'success') {
       statUploads.textContent = result.data.totalUploads;
       statDownloads.textContent = result.data.totalDownloads;
+      
+      if (result.data.semesterData) {
+          renderChart(result.data.semesterData);
+      }
+      
+      if (result.data.topContributors) {
+          renderLeaderboard(result.data.topContributors);
+      }
     }
   } catch (error) {
     console.error("Failed to load stats", error);
+  }
+}
+
+function renderLeaderboard(contributors) {
+  const listEl = document.getElementById('leaderboardList');
+  if (!listEl) return;
+  
+  listEl.innerHTML = '';
+  
+  if (!contributors || contributors.length === 0) {
+    listEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">No contributors yet. Be the first!</p>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  
+  contributors.forEach((user, index) => {
+    const medal = medals[index] || '';
+    const itemHtml = `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+          <div style="font-size: 1.5rem; line-height: 1;">${medal}</div>
+          <div>
+            <p style="margin: 0; font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">${user.studentName}</p>
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-secondary);">${user.department}</p>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; background: #dbeafe; color: #2563eb; padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">${user.uploads}</span>
+        </div>
+      </div>
+    `;
+    listEl.innerHTML += itemHtml;
+  });
+}
+
+function renderChart(semesterData) {
+  const ctx = document.getElementById('semesterChart');
+  if (!ctx) return;
+
+  const allSemesters = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
+  const dataMap = {};
+  
+  allSemesters.forEach(s => dataMap[s] = 0);
+  
+  semesterData.forEach(item => {
+    if(dataMap[item.semester] !== undefined) {
+       dataMap[item.semester] = parseInt(item.count);
+    }
+  });
+
+  const chartData = allSemesters.map(s => dataMap[s]);
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+  const textColor = isDarkMode ? '#e2e8f0' : '#475569';
+  const gridColor = isDarkMode ? '#334155' : '#e2e8f0';
+
+  if (semesterChartInstance) {
+    semesterChartInstance.data.datasets[0].data = chartData;
+    semesterChartInstance.options.scales.x.ticks.color = textColor;
+    semesterChartInstance.options.scales.y.ticks.color = textColor;
+    semesterChartInstance.options.scales.x.grid.color = gridColor;
+    semesterChartInstance.options.scales.y.grid.color = gridColor;
+    semesterChartInstance.update();
+  } else {
+    semesterChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: allSemesters.map(s => s + ' Sem'),
+        datasets: [{
+          label: 'Number of Papers',
+          data: chartData,
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+                stepSize: 1,
+                color: textColor
+            },
+            grid: {
+                color: gridColor
+            }
+          },
+          x: {
+              ticks: { color: textColor },
+              grid: { display: false, color: gridColor }
+          }
+        }
+      }
+    });
   }
 }
 
@@ -121,6 +259,7 @@ const finalPreviewImg = document.getElementById('finalPreviewImg');
 let cropper = null;
 let currentRotation = 0;
 let turnstileWidgetId = null;
+let scannedPages = []; // Store multiple cropped pages
 
 document.getElementById('btnCamera').addEventListener('click', () => cameraInput.click());
 document.getElementById('btnGallery').addEventListener('click', () => galleryInput.click());
@@ -185,13 +324,92 @@ document.getElementById('btnConfirmCrop').addEventListener('click', () => {
     imageSmoothingQuality: 'high',
   });
   
-  finalPreviewImg.src = canvas.toDataURL('image/jpeg');
+  const base64Img = canvas.toDataURL('image/jpeg');
+  scannedPages.push(base64Img);
 
   step2.classList.remove('active');
   step2.classList.add('hidden');
+  
+  // Show Pages step instead of Metadata
+  const step25 = document.getElementById('step2-5-pages');
+  step25.classList.remove('hidden');
+  step25.classList.add('active');
+  modalTitle.textContent = "Scanned Pages";
+  
+  renderPagesPreview();
+});
+
+function renderPagesPreview() {
+  const container = document.getElementById('pagesPreviewContainer');
+  container.innerHTML = '';
+  
+  scannedPages.forEach((pageSrc, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.flexShrink = '0';
+    
+    const img = document.createElement('img');
+    img.src = pageSrc;
+    img.style.height = '150px';
+    img.style.borderRadius = '8px';
+    img.style.boxShadow = 'var(--shadow-sm)';
+    img.style.border = '1px solid var(--glass-border)';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '<i data-feather="x" style="width: 14px; height: 14px;"></i>';
+    deleteBtn.style.position = 'absolute';
+    deleteBtn.style.top = '-8px';
+    deleteBtn.style.right = '-8px';
+    deleteBtn.style.background = '#ef4444';
+    deleteBtn.style.color = 'white';
+    deleteBtn.style.border = 'none';
+    deleteBtn.style.borderRadius = '50%';
+    deleteBtn.style.width = '24px';
+    deleteBtn.style.height = '24px';
+    deleteBtn.style.cursor = 'pointer';
+    deleteBtn.style.display = 'flex';
+    deleteBtn.style.alignItems = 'center';
+    deleteBtn.style.justifyContent = 'center';
+    deleteBtn.style.boxShadow = 'var(--shadow-sm)';
+    
+    deleteBtn.onclick = () => {
+      scannedPages.splice(index, 1);
+      if (scannedPages.length === 0) {
+        // Go back to step 1
+        document.getElementById('step2-5-pages').classList.remove('active');
+        document.getElementById('step2-5-pages').classList.add('hidden');
+        resetUploadModal();
+      } else {
+        renderPagesPreview();
+      }
+    };
+    
+    wrapper.appendChild(img);
+    wrapper.appendChild(deleteBtn);
+    container.appendChild(wrapper);
+  });
+  feather.replace();
+}
+
+document.getElementById('btnAddMorePages').addEventListener('click', () => {
+  document.getElementById('step2-5-pages').classList.remove('active');
+  document.getElementById('step2-5-pages').classList.add('hidden');
+  step1.classList.remove('hidden');
+  step1.classList.add('active');
+  modalTitle.textContent = "Upload Paper";
+});
+
+document.getElementById('btnContinueToMetadata').addEventListener('click', () => {
+  document.getElementById('step2-5-pages').classList.remove('active');
+  document.getElementById('step2-5-pages').classList.add('hidden');
   step3.classList.remove('hidden');
   step3.classList.add('active');
   modalTitle.textContent = "Paper Details";
+  
+  // Show first page in metadata preview
+  if (scannedPages.length > 0) {
+    finalPreviewImg.src = scannedPages[0];
+  }
 
   // Render or reset CAPTCHA explicitly
   if (typeof turnstile !== 'undefined') {
@@ -206,13 +424,14 @@ document.getElementById('btnConfirmCrop').addEventListener('click', () => {
   }
 });
 
-// Edit Image (Go back from Step 3 to Step 2)
+// Edit Image (Go back from Step 3 to Step 2.5)
 document.getElementById('btnEditImage').addEventListener('click', () => {
   step3.classList.remove('active');
   step3.classList.add('hidden');
-  step2.classList.remove('hidden');
-  step2.classList.add('active');
-  modalTitle.textContent = "Draw Crop Box";
+  const step25 = document.getElementById('step2-5-pages');
+  step25.classList.remove('hidden');
+  step25.classList.add('active');
+  modalTitle.textContent = "Scanned Pages";
 });
 
 // Finalize Upload
@@ -235,8 +454,33 @@ document.getElementById('metadataForm').addEventListener('submit', async (e) => 
     return;
   }
   
+  if (scannedPages.length === 0) {
+    alert("No pages found to upload.");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Finalize Upload";
+    return;
+  }
+
+  // Generate PDF from scannedPages using jsPDF
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  for(let i=0; i<scannedPages.length; i++) {
+    if (i > 0) doc.addPage();
+    
+    // Get image dimensions to scale it properly on A4
+    const imgProps = doc.getImageProperties(scannedPages[i]);
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    // Maintain aspect ratio
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    doc.addImage(scannedPages[i], 'JPEG', 0, 0, pdfWidth, pdfHeight);
+  }
+  
+  const pdfBase64 = doc.output('datauristring');
+
   data.captcha_token = captchaToken;
-  data.image = finalPreviewImg.src;
+  data.image = pdfBase64;
   
   try {
     const response = await fetch('backend/upload.php', {
@@ -275,9 +519,18 @@ function resetUploadModal() {
   step1.classList.add('active');
   step2.classList.remove('active');
   step2.classList.add('hidden');
+  
+  const step25 = document.getElementById('step2-5-pages');
+  if (step25) {
+      step25.classList.remove('active');
+      step25.classList.add('hidden');
+  }
+  
   step3.classList.remove('active');
   step3.classList.add('hidden');
   modalTitle.textContent = "Upload Paper";
+  
+  scannedPages = [];
   
   if (cropper) {
     cropper.destroy();
@@ -366,7 +619,9 @@ searchForm.addEventListener('submit', async (e) => {
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic;">
                   Uploaded by: <strong>${paper.studentName}</strong> (${paper.department}, ${paper.batch})
                 </p>
-                <a href="backend/download.php?id=${paper.id}" class="btn-secondary download-btn track-download" style="text-decoration:none; display:inline-block; margin-top: 0.75rem;">Download Image</a>
+                <a href="backend/download.php?id=${paper.id}" class="btn-secondary download-btn track-download" style="text-decoration:none; display:inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;">
+                   <i data-feather="download" style="width:16px;height:16px;"></i> Download Paper
+                </a>
               </div>
             </div>
           `;

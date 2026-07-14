@@ -67,32 +67,34 @@ if (!$captchaResponse || !$captchaResponse->success) {
 $imageDataUrl = $data['image'];
 
 // Extract base64 string from data URL
-if (preg_match('/^data:image\/(\w+);base64,/', $imageDataUrl, $type)) {
-    $imageDataUrl = substr($imageDataUrl, strpos($imageDataUrl, ',') + 1);
-    $type = strtolower($type[1]); // jpg, png, jpeg
+if (preg_match('/^data:(application\/pdf|image\/\w+);.*base64,/', $imageDataUrl)) {
+    $base64Str = substr($imageDataUrl, strpos($imageDataUrl, ',') + 1);
+    $fileData = base64_decode($base64Str);
     
-    if (!in_array($type, [ 'jpg', 'jpeg', 'png' ])) {
-        echo json_encode(["status" => "error", "message" => "Invalid image type"]);
-        exit;
-    }
-    
-    $imageData = base64_decode($imageDataUrl);
-    
-    if ($imageData === false) {
+    if ($fileData === false) {
         echo json_encode(["status" => "error", "message" => "Base64 decode failed"]);
         exit;
     }
+
+    // Magic Bytes Verification (Security check)
+    $magicBytes = substr($fileData, 0, 5);
+    if ($magicBytes !== '%PDF-') {
+        echo json_encode(["status" => "error", "message" => "Security Check Failed: Uploaded file is not a valid PDF."]);
+        exit;
+    }
+    
+    $extension = 'pdf';
 } else {
-    echo json_encode(["status" => "error", "message" => "Invalid image data format"]);
+    echo json_encode(["status" => "error", "message" => "Invalid file data format"]);
     exit;
 }
 
 // Generate unique filename
-$fileName = uniqid('paper_') . '.' . $type;
+$fileName = uniqid('paper_') . '.' . $extension;
 $filePath = $uploadDir . $fileName;
 
-// Save image
-if (file_put_contents($filePath, $imageData)) {
+// Save file
+if (file_put_contents($filePath, $fileData)) {
     
     // Insert into MySQL Database
     try {

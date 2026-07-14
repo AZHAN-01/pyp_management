@@ -12,12 +12,22 @@ try {
     // Get total downloads
     $stmtDownloads = $pdo->query("SELECT SUM(downloads) as totalDownloads FROM papers");
     $totalDownloads = $stmtDownloads->fetchColumn() ?: 0;
+
+    // Get uploads per semester
+    $stmtSemesters = $pdo->query("SELECT semester, COUNT(id) as count FROM papers GROUP BY semester");
+    $semesterData = $stmtSemesters->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get top contributors
+    $stmtContributors = $pdo->query("SELECT studentName, department, COUNT(id) as uploads FROM papers GROUP BY studentName, department ORDER BY uploads DESC LIMIT 3");
+    $topContributors = $stmtContributors->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         "status" => "success", 
         "data" => [
             "totalUploads" => (int)$totalUploads,
-            "totalDownloads" => (int)$totalDownloads
+            "totalDownloads" => (int)$totalDownloads,
+            "semesterData" => $semesterData,
+            "topContributors" => $topContributors
         ]
     ]);
 } catch (\PDOException $e) {

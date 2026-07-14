@@ -16,6 +16,12 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="./styles.css?v=2">
   
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  
   <!-- Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
@@ -56,8 +62,8 @@
             <i data-feather="upload-cloud"></i>
           </div>
           <h3>Upload Papers</h3>
-          <p>Contribute to the community by uploading images of previous year question papers.</p>
-          <span class="badge">Images Only</span>
+          <p>Contribute to the community by uploading images of previous year question papers. We'll automatically combine them into a PDF.</p>
+          <span class="badge">Scans to PDF</span>
         </div>
 
         <!-- Download Card -->
@@ -66,8 +72,8 @@
             <i data-feather="download"></i>
           </div>
           <h3>Download Papers</h3>
-          <p>Access and download high-quality images of past papers for your exam prep.</p>
-          <span class="badge warning">No PDFs</span>
+          <p>Access and download high-quality PDFs of past papers for your exam prep.</p>
+          <span class="badge">Auto PDF</span>
         </div>
       </section>
 
@@ -92,6 +98,30 @@
             <p class="stat-number" id="statDownloads">0</p>
           </div>
         </div>
+      </section>
+
+      <!-- Dashboard Widgets Section -->
+      <section class="dashboard-widgets" style="margin-top: 1rem; margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; width: 100%; padding: 0 1rem; max-width: 1200px; margin-left: auto; margin-right: auto;">
+        
+        <!-- Chart Container -->
+        <div class="chart-container" style="flex: 2; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+            <h3 style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;">Uploads per Semester</h3>
+            <canvas id="semesterChart"></canvas>
+        </div>
+
+        <!-- Leaderboard Container -->
+        <div class="leaderboard-container" style="flex: 1; min-width: 300px; background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center;">
+              <i data-feather="award" style="color: #eab308;"></i>
+              <h3 style="color: var(--text-secondary); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Top Contributors</h3>
+            </div>
+            
+            <div id="leaderboardList" style="display: flex; flex-direction: column; gap: 1rem;">
+               <!-- Populated via JS -->
+               <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">Loading...</p>
+            </div>
+        </div>
+
       </section>
     </main>
 
@@ -244,6 +274,21 @@
     </button>
   </div>
 
+  <!-- Desktop Mode Warning Modal -->
+  <div class="modal-overlay" id="desktopModeModal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <button class="close-btn" id="closeDesktopModeModal" aria-label="Close modal">
+        <i data-feather="x"></i>
+      </button>
+      <div style="margin-bottom: 1.5rem; color: var(--primary-color);">
+        <i data-feather="monitor" style="width: 48px; height: 48px;"></i>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 1rem; font-size: 1.5rem;">Desktop Recommended</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Please use desktop mode for better experience and view.</p>
+      <button class="btn-primary" id="btnAcknowledgeDesktopMode" style="width: 100%;">Continue Anyway</button>
+    </div>
+  </div>
+
   <!-- Upload Modal -->
   <div class="modal-overlay" id="uploadModal">
     <div class="modal-content">
@@ -294,6 +339,22 @@
               <button class="btn-primary" id="btnConfirmCrop">Confirm Crop</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Step 2.5: Pages Preview -->
+      <div id="step2-5-pages" class="step-container hidden">
+        <div id="pagesPreviewContainer" class="pages-preview-container">
+          <!-- Populated by JS -->
+        </div>
+        
+        <div class="action-buttons" style="justify-content: center; margin-top: 2rem;">
+          <button class="btn-secondary" id="btnAddMorePages" style="display: flex; align-items: center; gap: 0.5rem;">
+            <i data-feather="plus"></i> Add Page
+          </button>
+          <button class="btn-primary" id="btnContinueToMetadata" style="display: flex; align-items: center; gap: 0.5rem;">
+            Continue <i data-feather="arrow-right"></i>
+          </button>
         </div>
       </div>
 
@@ -434,6 +495,6 @@
   <!-- Scripts -->
   <script src="https://unpkg.com/feather-icons" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" defer></script>
-  <script src="./script.js?v=3" defer></script>
+  <script src="./script.js?v=5" defer></script>
 </body>
 </html>
