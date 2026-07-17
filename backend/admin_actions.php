@@ -29,12 +29,53 @@ try {
         $stmt = $pdo->prepare("SELECT fileName FROM papers WHERE id = ?");
         $stmt->execute([$id]);
         $paper = $stmt->fetch(PDO::FETCH_ASSOC);
+        $config = require __DIR__ . '/config.php';
         
         if ($paper) {
-            $filePath = __DIR__ . '/../uploads/' . $paper['fileName'];
-            // Delete file if it exists
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            $fileName = $paper['fileName'];
+            $isCloudinary = filter_var($fileName, FILTER_VALIDATE_URL) !== false;
+            
+            if ($isCloudinary) {
+                // Delete from Cloudinary
+                if (!empty($config['cloudinary']['api_key']) && !empty($config['cloudinary']['api_secret'])) {
+                    if (preg_match('/\/upload\/(?:v\d+\/)?([^\.]+)/', $fileName, $matches)) {
+                        $publicId = $matches[1];
+                        $cloudName = $config['cloudinary']['cloud_name'];
+                        $timestamp = time();
+                        $params = [
+                            'public_id' => $publicId,
+                            'timestamp' => $timestamp
+                        ];
+                        ksort($params);
+                        $signString = '';
+                        foreach ($params as $k => $v) {
+                            $signString .= $k . '=' . $v . '&';
+                        }
+                        $signString = rtrim($signString, '&');
+                        $signature = sha1($signString . $config['cloudinary']['api_secret']);
+                        
+                        $postFields = [
+                            'public_id' => $publicId,
+                            'api_key' => $config['cloudinary']['api_key'],
+                            'timestamp' => $timestamp,
+                            'signature' => $signature
+                        ];
+                        
+                        // Using 'image' resource type as PDF usually gets uploaded as image on Cloudinary
+                        $ch = curl_init("https://api.cloudinary.com/v1_1/$cloudName/image/destroy");
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_POST, true);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+                        curl_exec($ch);
+                        curl_close($ch);
+                    }
+                }
+            } else {
+                $filePath = __DIR__ . '/uploads/' . $fileName;
+                // Delete file if it exists
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
             }
             
             // Delete from DB

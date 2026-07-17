@@ -20,9 +20,10 @@ try {
     }
     
     $fileName = $paper['fileName'];
+    $isCloudinary = filter_var($fileName, FILTER_VALIDATE_URL) !== false;
     $filePath = __DIR__ . '/uploads/' . $fileName;
     
-    if (!file_exists($filePath)) {
+    if (!$isCloudinary && !file_exists($filePath)) {
         http_response_code(404);
         die("File is missing on the server");
     }
@@ -32,20 +33,26 @@ try {
     $updateStmt->execute([$id]);
     
     // 3. Serve the file
-    $extension = pathinfo($paper['fileName'], PATHINFO_EXTENSION);
-    if (!$extension) $extension = 'pdf';
-    $downloadName = $paper['paperCode'] . "_" . $paper['year'] . "." . $extension;
-    
-    header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename="' . basename($downloadName) . '"');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: ' . filesize($filePath));
-    
-    readfile($filePath);
-    exit;
+    if ($isCloudinary) {
+        // Redirect to Cloudinary URL
+        header('Location: ' . $fileName);
+        exit;
+    } else {
+        $extension = pathinfo($paper['fileName'], PATHINFO_EXTENSION);
+        if (!$extension) $extension = 'pdf';
+        $downloadName = $paper['paperCode'] . "_" . $paper['year'] . "." . $extension;
+        
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . basename($downloadName) . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+        
+        readfile($filePath);
+        exit;
+    }
 
 } catch (\PDOException $e) {
     http_response_code(500);

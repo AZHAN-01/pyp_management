@@ -93,35 +93,89 @@ if (preg_match('/^data:(application\/pdf|image\/\w+);.*base64,/', $imageDataUrl)
 $fileName = uniqid('paper_') . '.' . $extension;
 $filePath = $uploadDir . $fileName;
 
-// Save file
-if (file_put_contents($filePath, $fileData)) {
+$fileSavedLocal = file_put_contents($filePath, $fileData);
+if (!$fileSavedLocal) {
+    echo json_encode(["status" => "error", "message" => "Failed to save file locally"]);
+    exit;
+}
+
+$dbFileName = $fileName;
+
+// Upload to Cloudinary if configured
+if (!empty($config['cloudinary']['cloud_name']) && (!empty($config['cloudinary']['upload_preset']) || (!empty($config['cloudinary']['api_key']) && !empty($config['cloudinary']['api_secret'])))) {
+    $cloudName = $config['cloudinary']['cloud_name'];
+    $url = "https://api.cloudinary.com/v1_1/{$cloudName}/auto/upload";
     
-    // Insert into MySQL Database
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO papers 
-            (studentName, department, batch, paperName, paperCode, semester, year, month, fileName) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+    $postFields = [
+        'file' => new CURLFile($filePath)
+    ];
+
+    if (!empty($config['cloudinary']['upload_preset'])) {
+        $postFields['upload_preset'] = $config['cloudinary']['upload_preset'];
+    } else {
+        $timestamp = time();
+        $apiSecret = $config['cloudinary']['api_secret'];
+        $params = ['timestamp' => $timestamp];
+        ksort($params);
+        $signString = '';
+        foreach ($params as $k => $v) {
+            $signString .= $k . '=' . $v . '&';
+        }
+        $signString = rtrim($signString, '&');
+        $signature = sha1($signString . $apiSecret);
         
-        $stmt->execute([
-            $data['studentName'],
-            $data['department'],
-            $data['batch'],
-            $data['paperName'],
-            $data['paperCode'],
-            $data['semester'],
-            (int)$data['year'],
-            $data['month'],
-            $fileName
-        ]);
-        
-        echo json_encode(["status" => "success", "message" => "Upload Successful! Your paper is under review by an admin."]);
-    } catch (\PDOException $e) {
-        echo json_encode(["status" => "error", "message" => "Database insert failed: " . $e->getMessage()]);
+        $postFields['api_key'] = $config['cloudinary']['api_key'];
+        $postFields['timestamp'] = $timestamp;
+        $postFields['signature'] = $signature;
     }
     
-} else {
-    echo json_encode(["status" => "error", "message" => "Failed to save image"]);
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode == 200) {
+        $result = json_decode($response, true);
+        if (isset($result['secure_url'])) {
+            $dbFileName = $result['secure_url'];
+            // Optionally delete the local file since it's now on Cloudinary
+            unlink($filePath);
+        }
+    } else {
+        // Fallback to local file if Cloudinary upload fails
+        error_log("Cloudinary upload failed: " . $response);
+    }
+}
+
+// Insert into MySQL Database
+try {
+    $stmt = $pdo->prepare("
+        INSERT INTO papers 
+        (studentName, department, batch, paperName, paperCode, semester, year, month, fileName) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    
+    $stmt->execute([
+        $data['studentName'],
+        $data['department'],
+        $data['batch'],
+        $data['paperName'],
+        $data['paperCode'],
+        $data['semester'],
+        (int)$data['year'],
+        $data['month'],
+        $dbFileName
+    ]);
+    
+    echo json_encode(["status" => "success", "message" => "Upload Successful! Your paper is under review by an admin."]);
+} catch (\PDOException $e) {
+    // If it was a local file, delete it on db failure
+    if (!filter_var($dbFileName, FILTER_VALIDATE_URL) && file_exists($uploadDir . $dbFileName)) {
+        unlink($uploadDir . $dbFileName);
+    }
+    echo json_encode(["status" => "error", "message" => "Database insert failed: " . $e->getMessage()]);
 }
 ?>
